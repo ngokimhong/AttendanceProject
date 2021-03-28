@@ -16,7 +16,7 @@ namespace AttendanceProject.Controllers
     [ApiController]
     public class WorkShiftsController : ControllerBase
     {
-        
+
         private IRepositoryWrapper _repoWrapper;
 
         public WorkShiftsController(IRepositoryWrapper repositoryWrapper)
@@ -29,6 +29,13 @@ namespace AttendanceProject.Controllers
         public async Task<ActionResult> GetWorkShifts([FromQuery] WorkShiftParameters workShiftParameters)
         {
             var workShift = await _repoWrapper.WorkShift.GetAllWorkShiftAsync(workShiftParameters);
+            return Ok(workShift);
+        }
+
+        [HttpGet("searchbyemployeeid")]
+        public async Task<ActionResult> GetWorkShiftsByEmployeeId([FromQuery] WorkShiftParameters workShiftParameters)
+        {
+            var workShift = await _repoWrapper.WorkShift.GetWorkShiftByEmployeeIdAsync(workShiftParameters);
             return Ok(workShift);
         }
 

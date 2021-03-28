@@ -10,6 +10,8 @@ using Microsoft.Extensions.Hosting;
 using Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpOverrides;
+using Entities.Helper;
+using Entities.Models;
 
 namespace AttendanceProject
 {
@@ -29,6 +31,10 @@ namespace AttendanceProject
             services.AddDbContext<RepositoryContext>(o => o.UseMySql(Configuration.GetConnectionString("DefaultDatabase"), b => b.MigrationsAssembly("AttendanceProject"))) ;
             services.AddControllers();
             services.AddSwaggerGen();
+
+            services.AddScoped<ISortHelper<Company>, SortHelper<Company>>();
+            services.AddScoped<ISortHelper<Employee>, SortHelper<Employee>>();
+            
 
             services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
             services.Configure<ForwardedHeadersOptions>(options => {

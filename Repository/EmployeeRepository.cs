@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,10 +14,11 @@ namespace Repository
 {
     class EmployeeRepository : RepositoryBase<Employee>, IEmployeeRepository
     {
-        public EmployeeRepository(RepositoryContext repositoryContext)
+        private ISortHelper<Employee> _sortHelper;
+        public EmployeeRepository(RepositoryContext repositoryContext, ISortHelper<Employee> sortHelper)
             : base(repositoryContext)
         {
-
+            _sortHelper = sortHelper;
         }
 
         public void CreateEmployee(Employee employee)
@@ -31,7 +33,13 @@ namespace Repository
 
         public async Task<PagedList<Employee>> GetAllEmployeeAsync(EmployeeParameters employeeParameters)
         {
-            return await PagedList<Employee>.ToPageList(FindAll().OrderBy(att => att.BranchId),
+            var employees = FindAll().OrderBy(att => att.BranchId);
+
+            SearchByName(ref employees, employeeParameters.Name);
+
+            var sortedEmployees = _sortHelper.ApplySort(employees, employeeParameters.OrderBy);
+
+            return await PagedList<Employee>.ToPageList(sortedEmployees,
                 employeeParameters.PageNumber, employeeParameters.PageSize);
         }
 
@@ -43,6 +51,13 @@ namespace Repository
         public void UpdateEmployee(Employee employee)
         {
             Update(employee);
+        }
+
+        public void SearchByName(ref IOrderedQueryable<Employee> employees, string employeeName)
+        {
+            if (!employees.Any() || string.IsNullOrWhiteSpace(employeeName))
+                return;
+            employees = employees.Where(o => o.FullName.ToLower().Contains(employeeName.Trim().ToLower())).OrderBy(att => att.BranchId);
         }
     }
 }

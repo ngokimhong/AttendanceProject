@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Entities.Models;
 using Contracts;
+using Newtonsoft.Json;
 
 namespace AttendanceProject.Controllers
 {
@@ -25,6 +26,18 @@ namespace AttendanceProject.Controllers
         public async Task<IActionResult> GetAttendances([FromQuery] AttendanceParameters attendanceParameters)
         {
             var attendances =  await _repoWrapper.Attendance.GetAllAttendanceAsync(attendanceParameters);
+
+            /*
+            var metadata = new {
+                attendances.TotalCount,
+                attendances.PageSize,
+                attendances.CurrentPage,
+                attendances.HasNext,
+                attendances.HasPrevious
+            };
+            */
+            //Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(metadata));
+            //
 
             return Ok(attendances);
             

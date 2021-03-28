@@ -37,8 +37,17 @@ namespace Repository
 
         public async Task<WorkShift> GetWorkShiftByIdAsync(Guid id)
         {
-            return await FindByCondition(ws => ws.ShiftId == id).SingleOrDefaultAsync();
+            return await FindByCondition(ws => ws.ShiftId == id).SingleOrDefaultAsync(); 
         }
+
+        public async Task<PagedList<WorkShift>> GetWorkShiftByEmployeeIdAsync(WorkShiftParameters workShiftParameters)
+        {
+            IQueryable<WorkShift> result = FindByCondition(ws => ws.EmployeeId == workShiftParameters.EmployeeId);
+
+            return await PagedList<WorkShift>.ToPageList(result.OrderBy(ws => ws.ShiftId),
+                           workShiftParameters.PageNumber, workShiftParameters.PageSize);
+        }
+    
 
         public void UpdateWorkShift(WorkShift workShift)
         {

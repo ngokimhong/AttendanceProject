@@ -1,5 +1,7 @@
 ﻿using Contracts;
 using Entities;
+using Entities.Helper;
+using Entities.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +16,8 @@ namespace Repository
         private IEmployeeRepository _employee;
         private IAttendanceRepository _attendance;
         private IWorkShiftRepository _workShift;
+        private ISortHelper<Employee> _employeeSortHelper;
+        private ISortHelper<Company> _companySortHelper;
 
         public ICompanyRepository Company
         {
@@ -21,7 +25,7 @@ namespace Repository
             {
                 if(_company == null)
                 {
-                    _company = new CompanyRepository(_repoContext);
+                    _company = new CompanyRepository(_repoContext, _companySortHelper);
                 }
                 return _company;
             }
@@ -33,7 +37,7 @@ namespace Repository
             {
                 if(_employee == null)
                 {
-                    _employee = new EmployeeRepository(_repoContext);
+                    _employee = new EmployeeRepository(_repoContext, _employeeSortHelper);
                 }
                 return _employee;
             }
@@ -62,9 +66,13 @@ namespace Repository
                 return _workShift;
             }
         }
-        public RepositoryWrapper(RepositoryContext repositoryContext)
+        public RepositoryWrapper(RepositoryContext repositoryContext, 
+            ISortHelper<Company> companySortHelper,
+            ISortHelper<Employee> employeeSortHelper)
         {
             _repoContext = repositoryContext;
+            _companySortHelper = companySortHelper;
+            _employeeSortHelper = employeeSortHelper;
         }
 
         public async Task save()

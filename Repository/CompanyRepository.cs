@@ -13,10 +13,11 @@ namespace Repository
 {
     public class CompanyRepository : RepositoryBase<Company>, ICompanyRepository
     {
-        public CompanyRepository(RepositoryContext repositoryContext)
+        private ISortHelper<Company> _sortHelper;
+        public CompanyRepository(RepositoryContext repositoryContext, ISortHelper<Company> sortHelper)
             : base(repositoryContext)
         {
-
+            _sortHelper = sortHelper;
         }
 
         public void CreateCompany(Company company)
@@ -31,8 +32,10 @@ namespace Repository
 
         public async Task<PagedList<Company>> GetAllCompanyAsync(CompanyParameters companyParameters)
         {
-            //return await FindAll().OrderBy(com => com.BranchId).ToListAsync();
-            return await PagedList<Company>.ToPageList(FindAll().OrderBy(att => att.BranchId),
+            var companies = FindAll().OrderBy(att => att.BranchId);
+            SearchByName(ref companies, companyParameters.Name);
+            var sortedCompany = _sortHelper.ApplySort(companies, companyParameters.OrderBy);
+            return await PagedList<Company>.ToPageList(sortedCompany,
                 companyParameters.PageNumber, companyParameters.PageSize);
         }
 
@@ -44,6 +47,13 @@ namespace Repository
         public void UpdateCompany(Company company)
         {
             Update(company);
+        }
+
+        public void SearchByName(ref IOrderedQueryable<Company> companies, string branchName)
+        {
+            if (!companies.Any() || string.IsNullOrWhiteSpace(branchName))
+                return;
+            companies = companies.Where(o => o.BranchName.ToLower().Contains(branchName.Trim().ToLower())).OrderBy(att => att.BranchId);
         }
     }
 }

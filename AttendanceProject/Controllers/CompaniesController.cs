@@ -29,6 +29,8 @@ namespace AttendanceProject.Controllers
         public async Task<IActionResult> GetCompanies([FromQuery] CompanyParameters companyParameters)
         {
             var Companies = await _repoWrapper.Company.GetAllCompanyAsync(companyParameters);
+
+
             return Ok(Companies);
         }
 
